@@ -25,6 +25,7 @@ interface GetSitesOptions {
 interface WebName {
   domain:string,         // 主域名 如：www.test.com
   domainlist:string[],   // 除了主域名外的其他域名 如：['aa.test.com','www.aaa.com']
+  count:number,        // 需要添加的域名数量 如：2
 }
 // 定义创建网站的接口
 interface CreateSiteOptions {
@@ -32,16 +33,18 @@ interface CreateSiteOptions {
     path: string;
     type_id: number;
     type: string;
-    version: string;
+    version: number;
     port: number;
     ps: string;
     ftp: boolean;
-    sql: boolean;
+    sql: string;
     ftp_username?: string;
     ftp_password?: string;
     codeing?: string;
     datauser?: string;
     datapassword?: string;
+    need_index?: number; // 是否需要默认首页 0:不需要 1:需要
+    need_404?: number; // 是否需要404页面 0:不需要 1:需要
 }
 
 // 定义删除网站的接口
@@ -79,10 +82,19 @@ class BtPanelSDK {
 
     private async sendRequest<T>(uri: string, data: any = {}): Promise<T> {
         const { request_time, request_token } = this.generateSignature();
+        console.log(this.baseUrl + uri, {
+            ...data,
+             request_time,
+             request_token
+         })
         const response = await axios.post(this.baseUrl + uri, {
            ...data,
             request_time,
             request_token
+        },{
+          headers:{
+            "Content-Type":"application/x-www-form-urlencoded"
+          }
         });
         return response.data;
     }
@@ -139,7 +151,7 @@ class BtPanelSDK {
     // 创建网站
     async createSite(options: CreateSiteOptions): Promise<any> {
         const data: any = {
-            webname: options.webname,
+            webname: JSON.stringify(options.webname),
             path: options.path,
             type_id: options.type_id,
             type: options.type,
@@ -163,7 +175,11 @@ class BtPanelSDK {
             data.datauser = options.datauser;
             data.datapassword = options.datapassword;
         }
+        try{
         return this.sendRequest('/site?action=AddSite', data);
+        }catch(e){
+            // console.error(e)
+        }
     }
 
     // 删除网站
@@ -320,3 +336,24 @@ class BtPanelSDK {
 }
 
 export default BtPanelSDK;
+
+
+// const bt = new BtPanelSDK({apiSk:"aAkcMpqg3aBLsAVLPq7MQcFLHSCTd9dW",baseUrl:"http://154.95.187.194:36099"})
+
+// // bt.getSystemTotal().then(console.log)
+// bt.createSite({
+//   webname:{domain:'www.yy.com',domainlist:['aa.yy.com','www.yy.com'],count:2},
+//   path:"/www/wwwroot/test.com",
+//   type_id:0,
+//   type:"PHP",
+//   version:80,
+//   port:80,
+//   ps:"test",
+//   ftp:false,
+//   sql:"MySQL",
+//   codeing:"utf8mb4",
+//   datapassword:"das43rijfisdf",
+//   datauser:"dasdsad",
+//   need_index:0,
+//   need_404:0,
+// }).then(console.log).catch(console.error)
