@@ -1,0 +1,19 @@
+{
+  "name": "BtPanelSDK",
+  "version": "1.0.0",
+  "main": "src/BtPanelSDK.js",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "crypto": "^1.0.1"
+  },
+  "scripts": {
+    "build": "tsup src/BtPanelSDK.ts --format esm,cjs --dts --out-dir dist"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.4",
+    "@types/node": "^22.15.3",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3"
+  }
+}
